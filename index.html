@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Read at Your Pace</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #ffffff; --bg2: #f5f5f2; --bg3: #eeede9;
+    --t1: #1a1a18; --t2: #6b6a64; --t3: #9c9a92;
+    --b1: rgba(0,0,0,0.4); --b2: rgba(0,0,0,0.3); --b3: rgba(0,0,0,0.15);
+    --teal50:#E1F5EE;--teal100:#9FE1CB;--teal400:#1D9E75;--teal600:#0F6E56;--teal800:#085041;
+    --purple50:#EEEDFE;--purple100:#CECBF6;--purple200:#AFA9EC;--purple800:#3C3489;
+    --amber50:#FAEEDA;--amber100:#FAC775;--amber600:#854F0B;--amber800:#633806;
+    --blue50:#E6F1FB;--blue100:#B5D4F4;--blue600:#185FA5;--blue800:#0C447C;
+    --coral50:#FAECE7;--coral100:#F5C4B3;--coral600:#993C1D;
+    --gray50:#F1EFE8;--gray100:#D3D1C7;
+    --radius-md:8px;--radius-lg:12px;--radius-xl:16px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg1:#1c1c1a;--bg2:#252522;--bg3:#2e2e2b;
+      --t1:#e8e6dc;--t2:#a8a69e;--t3:#6e6d67;
+      --b1:rgba(255,255,255,0.5);--b2:rgba(255,255,255,0.3);--b3:rgba(255,255,255,0.12);
+      --teal50:#04342C;--teal100:#085041;--teal100:#9FE1CB;--teal400:#1D9E75;--teal600:#5DCAA5;--teal800:#9FE1CB;
+      --purple50:#26215C;--purple100:#3C3489;--purple200:#7F77DD;--purple800:#CECBF6;
+      --amber50:#412402;--amber100:#633806;--amber600:#EF9F27;--amber800:#FAC775;
+      --blue50:#042C53;--blue100:#0C447C;--blue600:#85B7EB;--blue800:#B5D4F4;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg3);min-height:100vh;padding:1rem;}
+  #app{max-width:760px;margin:0 auto;background:var(--bg3);}
+  .view{display:none;}.view.active{display:block;}
+  /* NAV */
+  .nav{display:flex;gap:6px;margin-bottom:1.25rem;}
+  .nav-btn{flex:1;padding:10px 6px;border-radius:var(--radius-md);border:0.5px solid var(--b2);background:var(--bg2);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .2s;text-align:center;}
+  .nav-btn.active{background:var(--teal50);border-color:var(--teal100);color:var(--teal800);}
+  .nav-btn.teacher-btn.active{background:var(--purple50);border-color:var(--purple200);color:var(--purple800);}
+  /* CARDS */
+  .card{background:var(--bg1);border-radius:var(--radius-xl);border:0.5px solid var(--b3);padding:1.4rem;}
+  /* LESSON GRID */
+  .lesson-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem;}
+  .lesson-card{border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg1);padding:1.1rem 1rem;cursor:pointer;transition:all .2s;text-align:center;}
+  .lesson-card:hover{border-color:var(--teal100);background:var(--teal50);}
+  .lesson-card.done{border-color:var(--teal100);}
+  .lc-word{font-size:26px;font-weight:800;color:var(--t1);font-family:'Lexend',sans-serif;margin-bottom:4px;}
+  .lc-theme{font-size:11px;font-weight:700;color:var(--t2);}
+  .lc-check{width:14px;height:14px;border-radius:50%;background:var(--teal100);margin:6px auto 0;display:none;}
+  .lesson-card.done .lc-check{display:block;}
+  /* STEP DOTS */
+  .step-header{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;}
+  .step-dots{display:flex;gap:5px;}
+  .step-dot{width:8px;height:8px;border-radius:50%;background:var(--bg2);border:0.5px solid var(--b2);transition:background .3s;}
+  .step-dot.done{background:var(--teal100);}
+  .step-dot.active{background:var(--teal400);}
+  .step-label{font-size:12px;font-weight:700;color:var(--t2);margin-left:auto;}
+  /* CALM */
+  .calm-card{text-align:center;padding:2rem 1.5rem;}
+  .calm-title{font-size:22px;font-weight:800;color:var(--t1);margin-bottom:.5rem;font-family:'Lexend',sans-serif;}
+  .calm-sub{font-size:15px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
+  .breath-ring{width:70px;height:70px;border-radius:50%;border:3px solid var(--teal100);margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;transition:transform 3s ease-in-out,border-color .5s;}
+  .breath-ring.inhale{transform:scale(1.4);border-color:var(--teal400);}
+  .breath-ring.exhale{transform:scale(.75);border-color:var(--teal600);}
+  .breath-dot{width:20px;height:20px;border-radius:50%;background:var(--teal50);border:2px solid var(--teal100);}
+  /* SOUND LISTEN */
+  .sound-letters{display:flex;gap:10px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+  .sound-letter{width:72px;height:72px;border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;font-family:'Lexend',sans-serif;color:var(--t1);cursor:pointer;transition:all .2s;text-align:center;flex-direction:column;}
+  .sound-letter:hover{border-color:var(--teal100);background:var(--teal50);}
+  .sound-letter.playing{background:var(--teal50);border-color:var(--teal400);color:var(--teal800);transform:scale(1.08);}
+  .sound-label{font-size:11px;font-weight:700;color:var(--t2);margin-top:3px;}
+  /* BUILD */
+  .build-slots{display:flex;gap:10px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+  .build-slot{width:72px;height:72px;border-radius:var(--radius-lg);border:2px dashed var(--b2);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;font-family:'Lexend',sans-serif;color:var(--t1);transition:all .2s;}
+  .build-slot.filled{border:2px solid var(--teal100);background:var(--teal50);color:var(--teal800);}
+  .build-tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .build-tile{width:72px;height:72px;border-radius:var(--radius-lg);border:0.5px solid var(--teal100);background:var(--bg1);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;font-family:'Lexend',sans-serif;color:var(--teal800);cursor:pointer;transition:all .2s;user-select:none;}
+  .build-tile:hover{background:var(--teal50);transform:scale(1.05);}
+  .build-tile.used{opacity:.25;pointer-events:none;}
+  /* READ */
+  .read-stage{text-align:center;}
+  .read-word{font-size:52px;font-weight:800;font-family:'Lexend',sans-serif;color:var(--t1);margin-bottom:.5rem;}
+  .read-phonemes{display:flex;gap:8px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+  .phoneme-pill{padding:4px 12px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--b3);font-size:14px;font-weight:700;color:var(--t2);}
+  .phoneme-pill.heard{background:var(--teal50);border-color:var(--teal100);color:var(--teal800);}
+  .mode-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .mode-btn{padding:11px 18px;border-radius:var(--radius-md);border:0.5px solid var(--b2);background:var(--bg2);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;transition:all .15s;}
+  .mode-btn:hover{background:var(--teal50);border-color:var(--teal100);color:var(--teal800);}
+  .mode-btn.primary{background:var(--teal50);border-color:var(--teal400);color:var(--teal800);}
+  .mode-btn.mic-active{background:var(--amber50);border-color:var(--amber100);color:var(--amber800);}
+  .listen-status{font-size:13px;font-weight:700;color:var(--t2);margin-top:.75rem;min-height:20px;}
+  /* MATCH */
+  .match-prompt{font-size:16px;font-weight:700;color:var(--t2);text-align:center;margin-bottom:1rem;}
+  .match-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .match-card{border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg2);padding:1.1rem .5rem;text-align:center;cursor:pointer;transition:all .2s;}
+  .match-card:hover{border-color:var(--teal100);background:var(--teal50);}
+  .match-card.correct{border-color:var(--teal400);background:var(--teal50);}
+  .match-emoji{font-size:36px;margin-bottom:6px;}
+  .match-label{font-size:13px;font-weight:700;color:var(--t2);}
+  /* ENCOURAGEMENT */
+  .enc-card{text-align:center;padding:2.5rem 1.5rem;}
+  .enc-icon{font-size:48px;margin-bottom:.75rem;}
+  .enc-title{font-size:22px;font-weight:800;color:var(--teal800);font-family:'Lexend',sans-serif;margin-bottom:.5rem;}
+  .enc-msgs{font-size:15px;color:var(--t2);line-height:1.7;}
+  .stars-earned{display:inline-block;padding:7px 18px;border-radius:var(--radius-md);background:var(--amber50);border:0.5px solid var(--amber100);font-size:14px;font-weight:800;color:var(--amber800);margin-top:.75rem;}
+  /* FEEDBACK */
+  .feedback{border-radius:var(--radius-md);padding:.7rem 1rem;margin-bottom:.75rem;font-size:13px;font-weight:700;display:none;}
+  .feedback.show{display:block;}
+  .feedback.good{background:var(--teal50);color:var(--teal800);}
+  .feedback.gentle{background:var(--amber50);color:var(--amber800);}
+  .feedback.neutral{background:var(--bg2);color:var(--t2);}
+  /* BUTTONS */
+  .bottom-ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:1rem;}
+  .btn-next{padding:12px 28px;border-radius:var(--radius-md);background:var(--teal50);border:0.5px solid var(--teal400);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--teal800);cursor:pointer;transition:all .15s;}
+  .btn-next:hover{background:var(--teal100);}
+  .btn-back{padding:12px 18px;border-radius:var(--radius-md);border:0.5px solid var(--b2);background:var(--bg2);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .15s;}
+  .breath-toggle{padding:8px 14px;border-radius:var(--radius-md);border:0.5px solid var(--b2);background:var(--bg1);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--t2);cursor:pointer;}
+  .font-ctrl{display:flex;gap:4px;}
+  .font-btn{padding:6px 10px;border-radius:var(--radius-md);border:0.5px solid var(--b2);background:var(--bg2);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--t2);cursor:pointer;}
+  /* WORD CARDS */
+  .word-card{border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg1);padding:.9rem .6rem;text-align:center;cursor:pointer;transition:all .2s;font-family:'Lexend',sans-serif;font-size:18px;font-weight:600;color:var(--t1);position:relative;}
+  .word-card:hover{background:var(--purple50);color:var(--purple800);border-color:var(--purple200);}
+  .word-card.speaking{background:var(--amber50);color:var(--amber800);border-color:var(--amber100);}
+  /* TEACHER DASH */
+  .stat-box{border-radius:var(--radius-md);padding:12px 10px;background:var(--bg2);text-align:center;}
+  .stat-num{font-size:24px;font-weight:800;color:var(--t1);}
+  .stat-lbl{font-size:11px;font-weight:700;color:var(--t2);margin-top:2px;}
+  .sound-table{border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg1);overflow:hidden;margin-bottom:1.25rem;}
+  .st-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:0.5px solid var(--b3);}
+  .st-row:last-child{border-bottom:none;}
+  .st-bar-wrap{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+  .st-bar{height:100%;border-radius:4px;background:var(--teal100);transition:width .5s;}
+  .settings-card{border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg1);padding:1rem 1.1rem;margin-bottom:1rem;}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--b3);}
+  .settings-row:last-child{border-bottom:none;}
+  .toggle{width:40px;height:22px;border-radius:11px;background:var(--bg2);border:0.5px solid var(--b2);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+  .toggle.on{background:var(--teal100);border-color:var(--teal400);}
+  .toggle-knob{width:18px;height:18px;border-radius:50%;background:var(--bg1);position:absolute;top:1px;left:1px;transition:left .2s;border:0.5px solid var(--b2);}
+  .toggle.on .toggle-knob{left:19px;}
+  /* MISC */
+  .section-label{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:.5rem;}
+  .tip-strip{font-size:13px;font-weight:700;padding:.65rem .9rem;border-radius:var(--radius-md);background:var(--purple50);color:var(--purple800);margin-bottom:.9rem;}
+  .stars-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--amber50);border:0.5px solid var(--amber100);}
+  .custom-story{border-radius:var(--radius-lg);border:0.5px solid var(--b3);background:var(--bg1);padding:1rem;margin-top:.75rem;display:none;}
+  .custom-story.open{display:block;}
+  .custom-story input,.custom-story textarea{width:100%;background:var(--bg2);border:0.5px solid var(--b2);border-radius:var(--radius-md);padding:8px 10px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--t1);margin-bottom:8px;}
+  .custom-story textarea{height:80px;resize:vertical;}
+  .add-btn{padding:9px 16px;border-radius:var(--radius-md);background:var(--purple50);border:0.5px solid var(--purple200);color:var(--purple800);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;}
+  .cat-btn{padding:6px 13px;border-radius:20px;border:0.5px solid var(--b3);background:var(--bg2);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .15s;}
+  .cat-btn.active{background:var(--teal50);border-color:var(--teal100);color:var(--teal800);}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+  <div style="font-size:16px;font-weight:800;color:var(--t1);font-family:'Lexend',sans-serif;flex:1;">Read at your pace</div>
+  <div class="stars-badge"><span id="starBadge" style="font-size:14px;font-weight:800;color:var(--amber800);">0</span><span style="font-size:12px;font-weight:700;color:var(--amber600);">stars</span></div>
+  <div class="font-ctrl">
+    <button class="font-btn" onclick="adjFont(-1)">A-</button>
+    <button class="font-btn" onclick="adjFont(1)">A+</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="showNav('lessons',this)">📖 Lessons</button>
+  <button class="nav-btn" onclick="showNav('words',this)">💬 Words</button>
+  <button class="nav-btn teacher-btn" onclick="showNav('teacher',this)">👩‍🏫 Teacher</button>
+</div>
+
+<!-- LESSONS -->
+<div id="view-lessons" class="view active">
+  <div id="screen-pick">
+    <div class="section-label" style="margin-bottom:.75rem;">Choose a lesson</div>
+    <div class="lesson-grid" id="lessonGrid"></div>
+    <div class="section-label" style="margin-bottom:.5rem;margin-top:.25rem;">Stories</div>
+    <div class="lesson-grid" id="storyGrid"></div>
+  </div>
+  <div id="screen-lesson" style="display:none;">
+    <div class="step-header">
+      <div class="step-dots" id="stepDots"></div>
+      <div class="step-label" id="stepLabel"></div>
+      <button class="breath-toggle" id="breathToggle" onclick="toggleBreath()">Breathing guide</button>
+    </div>
+    <!-- CALM -->
+    <div id="step-calm" class="step-screen">
+      <div class="card calm-card">
+        <div class="breath-ring" id="breathRing"><div class="breath-dot"></div></div>
+        <div class="calm-title" id="calmTitle"></div>
+        <div class="calm-sub">Take your time. There is no rush at all.<br>You can take a breath whenever you need.</div>
+      </div>
+      <div class="bottom-ctrl"><button class="btn-next" onclick="goStep(1)">I am ready</button></div>
+    </div>
+    <!-- LISTEN -->
+    <div id="step-listen" class="step-screen" style="display:none;">
+      <div class="card" style="margin-bottom:.9rem;">
+        <div style="font-size:13px;font-weight:700;color:var(--t2);text-align:center;margin-bottom:.9rem;">Listen to each sound — tap to hear it again</div>
+        <div class="sound-letters" id="soundLetters"></div>
+        <div style="font-size:12px;color:var(--t2);text-align:center;font-weight:600;">Tap any letter as many times as you like</div>
+      </div>
+      <div class="feedback" id="fb-listen"></div>
+      <div class="bottom-ctrl">
+        <button class="btn-back" onclick="goStep(0)">Back</button>
+        <button class="btn-next" onclick="goStep(2)">Next</button>
+      </div>
+    </div>
+    <!-- BUILD -->
+    <div id="step-build" class="step-screen" style="display:none;">
+      <div class="card" style="margin-bottom:.9rem;">
+        <div style="font-size:13px;font-weight:700;color:var(--t2);text-align:center;margin-bottom:.9rem;">Build the word — tap a letter to place it</div>
+        <div class="build-slots" id="buildSlots"></div>
+        <div class="build-tiles" id="buildTiles"></div>
+        <div class="feedback show neutral" id="fb-build" style="text-align:center;margin-top:.75rem;display:block;">Tap each letter to put it in place</div>
+      </div>
+      <div class="bottom-ctrl">
+        <button class="btn-back" onclick="goStep(1)">Back</button>
+        <button class="btn-back" onclick="resetBuild()" style="color:var(--purple800);border-color:var(--purple200);background:var(--purple50);">Reset</button>
+        <button class="btn-next" onclick="goStep(3)" id="buildNext" style="opacity:.4;pointer-events:none;">Next</button>
+      </div>
+    </div>
+    <!-- READ -->
+    <div id="step-read" class="step-screen" style="display:none;">
+      <div class="card read-stage" style="margin-bottom:.9rem;">
+        <div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:.5rem;">The word is</div>
+        <div class="read-word" id="readWord"></div>
+        <div class="read-phonemes" id="readPhonemes"></div>
+        <div class="mode-btns">
+          <button class="mode-btn primary" onclick="readWithMe()">Listen with me</button>
+          <button class="mode-btn" onclick="tryMic()" id="micBtn">I will try</button>
+          <button class="mode-btn" onclick="goStep(4)">I will watch</button>
+        </div>
+        <div class="listen-status" id="listenStatus"></div>
+      </div>
+      <div class="feedback" id="fb-read"></div>
+      <div class="bottom-ctrl">
+        <button class="btn-back" onclick="goStep(2)">Back</button>
+        <button class="btn-next" onclick="goStep(4)">Next</button>
+      </div>
+    </div>
+    <!-- MATCH -->
+    <div id="step-match" class="step-screen" style="display:none;">
+      <div class="card" style="margin-bottom:.9rem;">
+        <div class="match-prompt" id="matchPrompt"></div>
+        <div class="match-grid" id="matchGrid"></div>
+      </div>
+      <div class="feedback" id="fb-match"></div>
+      <div class="bottom-ctrl">
+        <button class="btn-back" onclick="goStep(3)">Back</button>
+        <button class="btn-next" onclick="goStep(5)" id="matchNext" style="opacity:.4;pointer-events:none;">Next</button>
+      </div>
+    </div>
+    <!-- DONE -->
+    <div id="step-done" class="step-screen" style="display:none;">
+      <div class="card enc-card">
+        <div class="enc-icon">🌟</div>
+        <div class="enc-title" id="encTitle">You did it!</div>
+        <div class="enc-msgs">You tried. You learned. You should be really proud.</div>
+        <div class="stars-earned" id="encStars">+2 stars earned</div>
+      </div>
+      <div class="bottom-ctrl"><button class="btn-next" onclick="backToList()">Choose another lesson</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- WORDS -->
+<div id="view-words" class="view">
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;" id="wordCatTabs"></div>
+  <div class="tip-strip">Tap any word to hear it spoken slowly — then say it out loud</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px;" id="wordGrid"></div>
+</div>
+
+<!-- TEACHER -->
+<div id="view-teacher" class="view">
+  <div style="margin-bottom:1.25rem;">
+    <div style="font-size:18px;font-weight:800;color:var(--t1);">Progress overview</div>
+    <div style="font-size:13px;color:var(--t2);margin-top:2px;">Growth only — no speed, no rankings</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem;">
+    <div class="stat-box"><div class="stat-num" id="dLessons">0</div><div class="stat-lbl">lessons done</div></div>
+    <div class="stat-box"><div class="stat-num" id="dWords">0</div><div class="stat-lbl">words practiced</div></div>
+    <div class="stat-box"><div class="stat-num" id="dStars">0</div><div class="stat-lbl">stars earned</div></div>
+  </div>
+  <div class="section-label">Sound exposure</div>
+  <div class="sound-table" id="soundTable"></div>
+  <div class="section-label">Preferred response mode</div>
+  <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;" id="prefRow"></div>
+  <div class="section-label">Settings</div>
+  <div class="settings-card" id="settingsCard"></div>
+  <div class="section-label" style="margin-top:.75rem;">Add a custom lesson</div>
+  <button class="add-btn" onclick="toggleCustom()">+ Add custom word or story</button>
+  <div class="custom-story" id="customStory">
+    <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:4px;">Word or story title</div>
+    <input type="text" id="customTitle" placeholder="e.g. dog">
+    <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:4px;">Letters (comma separated) or paste a short story</div>
+    <textarea id="customText" placeholder="d, o, g  — or paste a short story here"></textarea>
+    <button class="add-btn" onclick="addCustomLesson()">Load lesson</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const LESSONS=[
+  {id:'cat',word:'cat',sounds:['c','a','t'],theme:'animals',emoji:'🐱',pics:[{e:'🐱',l:'cat',ok:true},{e:'🐶',l:'dog'},{e:'🐰',l:'rabbit'}]},
+  {id:'sun',word:'sun',sounds:['s','u','n'],theme:'nature',emoji:'☀️',pics:[{e:'☀️',l:'sun',ok:true},{e:'🌙',l:'moon'},{e:'☁️',l:'cloud'}]},
+  {id:'box',word:'box',sounds:['b','o','x'],theme:'objects',emoji:'📦',pics:[{e:'📦',l:'box',ok:true},{e:'⚽',l:'ball'},{e:'🚗',l:'car'}]},
+  {id:'hat',word:'hat',sounds:['h','a','t'],theme:'clothes',emoji:'🎩',pics:[{e:'🎩',l:'hat',ok:true},{e:'👟',l:'shoe'},{e:'🧤',l:'glove'}]},
+  {id:'bug',word:'bug',sounds:['b','u','g'],theme:'animals',emoji:'🐛',pics:[{e:'🐛',l:'bug',ok:true},{e:'🐝',l:'bee'},{e:'🐌',l:'snail'}]},
+  {id:'map',word:'map',sounds:['m','a','p'],theme:'school',emoji:'🗺️',pics:[{e:'🗺️',l:'map',ok:true},{e:'📏',l:'ruler'},{e:'✏️',l:'pencil'}]},
+];
+const STORIES=[
+  {id:'turtle',word:'The Brave Turtle',sounds:[],theme:'story',emoji:'🐢',isStory:true,text:'Once there was a little turtle named Tess. She lived by a quiet pond. Every morning she watched the butterflies dance. One day she decided to cross the big meadow. It was a long walk but she took it one step at a time.',pics:[{e:'🐢',l:'turtle',ok:true},{e:'🦋',l:'butterfly'},{e:'🌸',l:'flower'}]},
+  {id:'star',word:'Star Journey',sounds:[],theme:'story',emoji:'⭐',isStory:true,text:'Leo looked up at the night sky filled with bright shining stars. He wondered if anyone lived up there. A shooting star zipped past his window. He made a wish for a brave adventure.',pics:[{e:'⭐',l:'star',ok:true},{e:'🌙',l:'moon'},{e:'☀️',l:'sun'}]},
+];
+const WORD_CATS={
+  Colors:['red','blue','green','yellow','orange','purple','pink','white','black','brown'],
+  Animals:['cat','dog','bird','fish','bear','duck','frog','lion','owl','deer'],
+  Actions:['jump','run','sit','play','read','sing','draw','help','swim','fly'],
+  Feelings:['happy','sad','brave','calm','proud','kind','safe','loved','glad','free'],
+  Numbers:['one','two','three','four','five','six','seven','eight','nine','ten'],
+  School:['book','desk','chair','pencil','class','write','learn','share','listen','think'],
+  Family:['mom','dad','sister','brother','grandma','grandpa','baby','uncle','aunt','home'],
+};
+const SETTINGS_DEF=[
+  {key:'speechOn',label:'Speech recognition',sub:'Mic button available for students',def:true},
+  {key:'breathOn',label:'Breathing guide',sub:'Breathing animation on calm screen',def:true},
+  {key:'slowMode',label:'Slow speech',sub:'Words spoken at a gentler pace',def:true},
+];
+
+let state=loadState();
+let lessons=[...LESSONS];
+let allStories=[...STORIES];
+let currentLesson=null,currentStep=0,buildOrder=[],buildFilled=[],breathActive=false,breathTimer=null,breathPhaseIdx=0,wordCat='Colors',fontSize=state.fontSize||22,micListening=false,matchDone=false;
+
+function loadState(){try{const s=localStorage.getItem('rayp_v3');return s?JSON.parse(s):defState();}catch(e){return defState();}}
+function defState(){return{stars:0,lessonsCompleted:[],wordsPracticed:[],soundsHeard:{},prefMode:{speak:0,listen:0,watch:0},settings:{speechOn:true,breathOn:true,slowMode:true},fontSize:22};}
+function save(){try{localStorage.setItem('rayp_v3',JSON.stringify(state));}catch(e){}}
+
+function showNav(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='teacher')refreshDash();
+}
+
+function adjFont(d){fontSize=Math.min(34,Math.max(16,fontSize+d*2));state.fontSize=fontSize;save();applyFont();}
+function applyFont(){
+  document.querySelectorAll('.read-word').forEach(e=>e.style.fontSize=Math.min(56,fontSize*2.2)+'px');
+  document.querySelectorAll('.lc-word').forEach(e=>e.style.fontSize=Math.max(18,fontSize-4)+'px');
+  document.querySelectorAll('.sound-letter,.build-slot,.build-tile').forEach(e=>e.style.fontSize=Math.max(22,fontSize+8)+'px');
+}
+
+function buildLessonGrid(){
+  const g=document.getElementById('lessonGrid');g.innerHTML='';
+  lessons.forEach(l=>{
+    const done=state.lessonsCompleted.includes(l.id);
+    const d=document.createElement('div');d.className='lesson-card'+(done?' done':'');
+    d.innerHTML='<div class="lc-word">'+l.word+'</div><div class="lc-theme">'+l.theme+'</div><div class="lc-check"></div>';
+    d.onclick=()=>startLesson(l);g.appendChild(d);
+  });
+  const sg=document.getElementById('storyGrid');sg.innerHTML='';
+  allStories.forEach(s=>{
+    const done=state.lessonsCompleted.includes(s.id);
+    const d=document.createElement('div');d.className='lesson-card'+(done?' done':'');
+    d.innerHTML='<div style="font-size:20px;margin-bottom:4px;">'+s.emoji+'</div><div class="lc-word" style="font-size:16px;">'+s.word+'</div><div class="lc-theme">'+s.theme+'</div><div class="lc-check"></div>';
+    d.onclick=()=>startLesson(s);sg.appendChild(d);
+  });
+  applyFont();
+}
+
+function startLesson(l){currentLesson=l;currentStep=0;buildOrder=[];buildFilled=[];matchDone=false;document.getElementById('screen-pick').style.display='none';document.getElementById('screen-lesson').style.display='block';buildStepDots();setupCalm();goStep(0);}
+function backToList(){document.getElementById('screen-pick').style.display='block';document.getElementById('screen-lesson').style.display='none';stopBreath();buildLessonGrid();}
+
+function buildStepDots(){
+  const dots=document.getElementById('stepDots');dots.innerHTML='';
+  const n=currentLesson.isStory?3:5;
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='step-dot';dots.appendChild(d);}
+}
+function updateDots(step){
+  document.querySelectorAll('.step-dot').forEach((d,i)=>{d.classList.remove('active','done');if(i<step)d.classList.add('done');if(i===step)d.classList.add('active');});
+  const labels=['Calm','Listen','Build','Read','Match','Done'];
+  document.getElementById('stepLabel').textContent=labels[step]||'';
+}
+
+function goStep(s){
+  currentStep=s;
+  ['step-calm','step-listen','step-build','step-read','step-match','step-done'].forEach(id=>document.getElementById(id).style.display='none');
+  if(currentLesson.isStory){
+    const map=['step-calm','step-read','step-match','step-done'];
+    document.getElementById(map[s]||'step-done').style.display='block';
+    updateDots(s);
+    if(s===1)setupStoryRead();if(s===2)setupMatch();if(s===3)finishLesson();
+  } else {
+    const screens=['step-calm','step-listen','step-build','step-read','step-match','step-done'];
+    document.getElementById(screens[s]).style.display='block';
+    updateDots(s);
+    if(s===1)setupListen();if(s===2)setupBuild();if(s===3)setupRead();if(s===4)setupMatch();if(s===5)finishLesson();
+  }
+}
+
+function setupCalm(){document.getElementById('calmTitle').textContent=currentLesson.isStory?currentLesson.word:'Let\'s read: '+currentLesson.word;if(state.settings.breathOn)startBreath();}
+
+function setupListen(){
+  const c=document.getElementById('soundLetters');c.innerHTML='';
+  currentLesson.sounds.forEach(letter=>{
+    const wrap=document.createElement('div');wrap.style.textAlign='center';
+    const btn=document.createElement('div');btn.className='sound-letter';btn.textContent=letter;
+    btn.onclick=()=>{speakText('/'+letter+'/',0.5);btn.classList.add('playing');state.soundsHeard[letter]=(state.soundsHeard[letter]||0)+1;save();setTimeout(()=>btn.classList.remove('playing'),700);};
+    const lbl=document.createElement('div');lbl.className='sound-label';lbl.textContent='/'+letter+'/';
+    wrap.appendChild(btn);wrap.appendChild(lbl);c.appendChild(wrap);
+  });
+  showFeedback('fb-listen','neutral','Tap each letter to hear its sound');
+}
+
+function setupBuild(){
+  buildOrder=[];
+  const slots=document.getElementById('buildSlots');slots.innerHTML='';
+  const tiles=document.getElementById('buildTiles');tiles.innerHTML='';
+  currentLesson.sounds.forEach((_,i)=>{const slot=document.createElement('div');slot.className='build-slot';slot.id='slot-'+i;slots.appendChild(slot);});
+  [...currentLesson.sounds].sort(()=>Math.random()-.5).forEach((letter,i)=>{
+    const tile=document.createElement('div');tile.className='build-tile';tile.textContent=letter;tile.id='tile-'+i;
+    tile.onclick=()=>placeLetter(letter,tile);tiles.appendChild(tile);
+  });
+  document.getElementById('buildNext').style.opacity='.4';document.getElementById('buildNext').style.pointerEvents='none';
+  showFeedback('fb-build','neutral','Tap each letter to put it in place');
+}
+
+function placeLetter(letter,tile){
+  const nextSlot=buildOrder.length;if(nextSlot>=currentLesson.sounds.length)return;
+  buildOrder.push(letter);tile.classList.add('used');
+  const slot=document.getElementById('slot-'+nextSlot);slot.textContent=letter;slot.classList.add('filled');
+  speakText('/'+letter+'/',0.6);
+  if(buildOrder.length===currentLesson.sounds.length){
+    const correct=buildOrder.join('')===currentLesson.sounds.join('');
+    if(correct){showFeedback('fb-build','good','You built the word!');document.getElementById('buildNext').style.opacity='1';document.getElementById('buildNext').style.pointerEvents='auto';}
+    else{showFeedback('fb-build','gentle','Nice try! Tap reset and try again.');}
+  }
+}
+function resetBuild(){setupBuild();}
+
+function setupRead(){
+  document.getElementById('readWord').textContent=currentLesson.word;
+  const ph=document.getElementById('readPhonemes');ph.innerHTML='';
+  currentLesson.sounds.forEach(s=>{const pill=document.createElement('div');pill.className='phoneme-pill';pill.textContent='/'+s+'/';pill.id='ph-'+s;ph.appendChild(pill);});
+  document.getElementById('listenStatus').textContent='';showFeedback('fb-read','','');
+}
+function setupStoryRead(){document.getElementById('readWord').textContent=currentLesson.word;document.getElementById('readPhonemes').innerHTML='';document.getElementById('listenStatus').textContent='';}
+
+function readWithMe(){
+  const rate=state.settings.slowMode?0.65:0.9;
+  if(currentLesson.isStory){speakText(currentLesson.text,rate);return;}
+  state.prefMode.listen=(state.prefMode.listen||0)+1;save();
+  currentLesson.sounds.forEach((s,i)=>setTimeout(()=>{speakText('/'+s+'/',rate);const pill=document.getElementById('ph-'+s);if(pill)pill.classList.add('heard');},i*900));
+  setTimeout(()=>{speakText(currentLesson.word,rate);showFeedback('fb-read','good','Listen to how the sounds come together!');},currentLesson.sounds.length*900+300);
+}
+
+function tryMic(){
+  if(!state.settings.speechOn){showFeedback('fb-read','neutral','Speech is turned off in settings.');return;}
+  if(micListening){micListening=false;document.getElementById('micBtn').className='mode-btn';return;}
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){showFeedback('fb-read','gentle','Speech recognition is not available in this browser. Try Chrome on desktop or Android.');return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();rec.lang='en-US';rec.interimResults=true;rec.maxAlternatives=3;
+  micListening=true;document.getElementById('micBtn').className='mode-btn mic-active';
+  document.getElementById('listenStatus').textContent='Listening… take your time';
+  state.prefMode.speak=(state.prefMode.speak||0)+1;save();
+  rec.onresult=(e)=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;checkPhonemes(t.toLowerCase());document.getElementById('listenStatus').textContent='I heard: "'+t+'"';};
+  rec.onerror=()=>{micListening=false;document.getElementById('micBtn').className='mode-btn';showFeedback('fb-read','neutral','No worries — try again or listen with me.');document.getElementById('listenStatus').textContent='';};
+  rec.onend=()=>{micListening=false;document.getElementById('micBtn').className='mode-btn';};
+  rec.start();setTimeout(()=>{try{rec.stop();}catch(e){}},8000);
+}
+
+function checkPhonemes(transcript){
+  if(!currentLesson.sounds.length)return;
+  let found=0;
+  currentLesson.sounds.forEach(s=>{const pill=document.getElementById('ph-'+s);if(transcript.includes(s)){found++;if(pill)pill.classList.add('heard');}});
+  if(found===currentLesson.sounds.length)showFeedback('fb-read','good','I heard all your sounds — great job!');
+  else if(found>0)showFeedback('fb-read','gentle','I heard some sounds — keep going, you are doing great!');
+  else showFeedback('fb-read','gentle','I am still listening. Take a breath and try again.');
+}
+
+function setupMatch(){
+  const l=currentLesson;
+  document.getElementById('matchPrompt').textContent='Tap the picture that shows: '+l.word;
+  const grid=document.getElementById('matchGrid');grid.innerHTML='';
+  matchDone=false;
+  document.getElementById('matchNext').style.opacity='.4';document.getElementById('matchNext').style.pointerEvents='none';
+  const pics=(l.pics||[{e:'📝',l:l.word,ok:true},{e:'📖',l:'book'},{e:'✏️',l:'pencil'}]).slice().sort(()=>Math.random()-.5);
+  pics.forEach(p=>{
+    const card=document.createElement('div');card.className='match-card';
+    card.innerHTML='<div class="match-emoji">'+p.e+'</div><div class="match-label">'+p.l+'</div>';
+    card.onclick=()=>{
+      if(matchDone)return;
+      if(p.ok){card.classList.add('correct');showFeedback('fb-match','good','You matched it! Well done.');matchDone=true;document.getElementById('matchNext').style.opacity='1';document.getElementById('matchNext').style.pointerEvents='auto';}
+      else{showFeedback('fb-match','gentle','Have another look — tap the right picture.');}
+    };
+    grid.appendChild(card);
+  });
+}
+
+function finishLesson(){
+  const l=currentLesson;
+  if(!state.lessonsCompleted.includes(l.id)){state.lessonsCompleted.push(l.id);state.stars+=2;save();}
+  document.getElementById('starBadge').textContent=state.stars;
+  document.getElementById('encStars').textContent='+2 stars earned';
+  document.getElementById('dStars').textContent=state.stars;
+}
+
+function showFeedback(id,type,msg){
+  const el=document.getElementById(id);if(!el)return;
+  el.className='feedback';if(type&&msg){el.classList.add('show',type);el.textContent=msg;}
+}
+function speakText(text,rate){const utt=new SpeechSynthesisUtterance(text);utt.rate=rate||0.75;utt.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(utt);}
+
+const breathPhases=[{cls:'inhale',dur:3200},{cls:'',dur:1500},{cls:'exhale',dur:4000},{cls:'',dur:1000}];
+function startBreath(){breathActive=true;breathPhaseIdx=0;runBreath();}
+function stopBreath(){breathActive=false;clearTimeout(breathTimer);const r=document.getElementById('breathRing');if(r)r.className='breath-ring';}
+function runBreath(){if(!breathActive)return;const p=breathPhases[breathPhaseIdx%breathPhases.length];const r=document.getElementById('breathRing');if(r)r.className='breath-ring '+(p.cls||'');breathPhaseIdx++;breathTimer=setTimeout(runBreath,p.dur);}
+function toggleBreath(){if(breathActive){stopBreath();document.getElementById('breathToggle').textContent='Breathing guide';}else{startBreath();document.getElementById('breathToggle').textContent='Stop guide';}}
+
+function buildWordCatTabs(){
+  const bar=document.getElementById('wordCatTabs');bar.innerHTML='';
+  Object.keys(WORD_CATS).forEach(cat=>{const btn=document.createElement('button');btn.className='cat-btn'+(cat===wordCat?' active':'');btn.textContent=cat;btn.onclick=()=>{wordCat=cat;buildWordGrid();buildWordCatTabs();};bar.appendChild(btn);});
+}
+function buildWordGrid(){
+  const g=document.getElementById('wordGrid');g.innerHTML='';
+  const practiced=new Set(state.wordsPracticed);
+  WORD_CATS[wordCat].forEach(w=>{
+    const card=document.createElement('div');card.className='word-card'+(practiced.has(w)?'':' ');
+    card.style.borderColor=practiced.has(w)?'var(--teal100)':'';
+    card.textContent=w;
+    if(practiced.has(w)){const dot=document.createElement('div');dot.style.cssText='width:8px;height:8px;border-radius:50%;background:var(--teal100);position:absolute;top:5px;right:6px;';card.appendChild(dot);}
+    card.onclick=()=>{
+      speechSynthesis.cancel();const utt=new SpeechSynthesisUtterance(w);utt.rate=state.settings.slowMode?0.6:0.8;utt.pitch=1.05;
+      card.classList.add('speaking');utt.onend=()=>card.classList.remove('speaking');speechSynthesis.speak(utt);
+      if(!practiced.has(w)){state.wordsPracticed.push(w);save();buildWordGrid();}
+    };
+    g.appendChild(card);
+  });
+}
+
+function refreshDash(){
+  document.getElementById('dLessons').textContent=state.lessonsCompleted.length;
+  document.getElementById('dWords').textContent=state.wordsPracticed.length;
+  document.getElementById('dStars').textContent=state.stars;
+  const sounds=state.soundsHeard;const all=Object.entries(sounds).sort((a,b)=>b[1]-a[1]);const max=all[0]?all[0][1]:1;
+  const table=document.getElementById('soundTable');table.innerHTML='';
+  if(!all.length){table.innerHTML='<div class="st-row"><span style="font-size:13px;color:var(--t2);font-weight:600;">No sounds practiced yet</span></div>';return;}
+  all.slice(0,8).forEach(([s,n])=>{const row=document.createElement('div');row.className='st-row';row.innerHTML='<div style="width:32px;font-size:16px;font-weight:800;font-family:Lexend,sans-serif;color:var(--t1);">/'+s+'/</div><div class="st-bar-wrap"><div class="st-bar" style="width:'+Math.round((n/max)*100)+'%"></div></div><div style="font-size:12px;font-weight:700;color:var(--t2);min-width:60px;text-align:right;">'+n+' time'+(n>1?'s':'')+'</div>';table.appendChild(row);});
+  const pref=state.prefMode;const pr=document.getElementById('prefRow');pr.innerHTML='';
+  [{k:'speak',l:'Speaking'},{k:'listen',l:'Listening'},{k:'watch',l:'Watching'}].forEach(m=>{const d=document.createElement('div');d.style.cssText='flex:1;min-width:90px;border-radius:var(--radius-md);padding:10px;background:var(--bg2);text-align:center;border:0.5px solid var(--b3);';d.innerHTML='<div style="font-size:18px;font-weight:800;color:var(--t1);">'+(pref[m.k]||0)+'</div><div style="font-size:11px;font-weight:700;color:var(--t2);margin-top:2px;">'+m.l+'</div>';pr.appendChild(d);});
+  const sc=document.getElementById('settingsCard');sc.innerHTML='';
+  SETTINGS_DEF.forEach(s=>{const val=state.settings[s.key];const row=document.createElement('div');row.className='settings-row';row.innerHTML='<div><div style="font-size:14px;font-weight:700;color:var(--t1);">'+s.label+'</div><div style="font-size:12px;color:var(--t2);margin-top:2px;">'+s.sub+'</div></div><div class="toggle'+(val?' on':'')+'" onclick="toggleSetting(\''+s.key+'\',this)"><div class="toggle-knob"></div></div>';sc.appendChild(row);});
+}
+function toggleSetting(key,el){state.settings[key]=!state.settings[key];save();el.classList.toggle('on',state.settings[key]);}
+function toggleCustom(){document.getElementById('customStory').classList.toggle('open');}
+function addCustomLesson(){
+  const title=document.getElementById('customTitle').value.trim();const text=document.getElementById('customText').value.trim();if(!title)return;
+  const sounds=text.includes(',')?text.split(',').map(s=>s.trim()).filter(Boolean):[];
+  const isStory=!sounds.length&&text.length>10;const id='custom_'+Date.now();
+  if(isStory){allStories.push({id,word:title,sounds:[],theme:'custom',emoji:'📖',isStory:true,text,pics:[{e:'📖',l:title,ok:true},{e:'✏️',l:'pencil'},{e:'📝',l:'paper'}]});}
+  else{lessons.push({id,word:title,sounds,theme:'custom',emoji:'📝',pics:[{e:'📝',l:title,ok:true},{e:'📖',l:'book'},{e:'✏️',l:'pencil'}]});}
+  document.getElementById('customTitle').value='';document.getElementById('customText').value='';document.getElementById('customStory').classList.remove('open');
+  buildLessonGrid();
+}
+
+buildLessonGrid();buildWordCatTabs();buildWordGrid();document.getElementById('starBadge').textContent=state.stars;applyFont();
+</script>
+</body>
+</html>
